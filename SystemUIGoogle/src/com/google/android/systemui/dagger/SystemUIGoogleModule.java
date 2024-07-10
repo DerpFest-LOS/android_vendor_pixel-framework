@@ -124,7 +124,6 @@ import com.google.android.systemui.assist.AssistManagerGoogle;
 import com.google.android.systemui.assist.dagger.AssistModule;
 import com.google.android.systemui.columbus.dagger.ColumbusModule;
 import com.google.android.systemui.controls.GoogleControlsTileResourceConfigurationImpl;
-import com.google.android.systemui.elmyra.dagger.ElmyraModule;
 import com.google.android.systemui.dreamliner.DockObserver;
 import com.google.android.systemui.dreamliner.dagger.DreamlinerModule;
 import com.google.android.systemui.power.dagger.PowerModuleGoogle;
@@ -138,7 +137,6 @@ import com.google.android.systemui.smartspace.dagger.SmartspaceGoogleModule;
 import com.google.android.systemui.statusbar.dagger.StartCentralSurfacesGoogleModule;
 import com.google.android.systemui.statusbar.KeyguardIndicationControllerGoogle;
 import com.google.android.systemui.statusbar.policy.BatteryControllerImplGoogle;
-import com.google.android.systemui.elmyra.ServiceConfigurationGoogle;
 import com.google.android.systemui.statusbar.policy.dagger.SystemUIGooglePolicyModule;
 import com.google.android.systemui.SystemUIGoogleAppComponentFactory;
 
@@ -186,7 +184,6 @@ import dagger.Lazy;
         DreamlinerModule.class,
         ReverseChargingModule.class,
         AssistModule.class,
-        ElmyraModule.class,
         ColumbusModule.class,
         SystemUIGooglePolicyModule.class
 })

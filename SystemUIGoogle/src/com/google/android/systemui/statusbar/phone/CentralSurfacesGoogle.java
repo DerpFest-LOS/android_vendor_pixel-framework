@@ -32,6 +32,7 @@ import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.logging.MetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.ViewMediatorCallback;
@@ -74,7 +75,6 @@ import com.android.systemui.settings.brightness.BrightnessSliderController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.CameraLauncher;
 import com.android.systemui.shade.GlanceableHubContainerController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.QuickSettingsController;
@@ -111,13 +111,12 @@ import com.android.systemui.statusbar.phone.DozeScrimController;
 import com.android.systemui.statusbar.phone.DozeServiceHost;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LightBarController;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
-import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.PhoneStatusBarPolicy;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BurnInProtectionController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -163,12 +162,10 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
     private final KeyguardIndicationControllerGoogle mKeyguardIndicationController;
     private final WallpaperNotifier mWallpaperNotifier;
     private final Optional<ReverseChargingViewController> mReverseChargingViewControllerOptional;
-    private final NotificationPanelViewController mNotificationPanelViewController;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final SmartSpaceController mSmartSpaceController;
     private final NotificationLockscreenUserManagerGoogle mNotificationLockscreenUserManagerGoogle;
     private final DockObserver mDockObserver;
-    private final BurnInProtectionController mBurnInProtectionController;
 
     private long mAnimStartTime;
     private int mReceivingBatteryLevel;
@@ -258,7 +255,6 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
-            NotificationIconAreaController notificationIconAreaController,
             BrightnessSliderController.Factory brightnessSliderFactory,
             ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
@@ -285,7 +281,7 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
             BrightnessMirrorShowingInteractor brightnessMirrorShowingInteractor,
             GlanceableHubContainerController glanceableHubContainerController,
             EmergencyGestureIntentFactory emergencyGestureIntentFactory,
-            NotificationPanelViewController notificationPanelViewController,
+            ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             BurnInProtectionController burnInProtectionController,
             Optional<ReverseChargingViewController> reverseChargingViewControllerOptional,
             WallpaperNotifier wallpaperNotifier,
@@ -294,23 +290,23 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
     ) {
         super(context, notificationsController, fragmentService, lightBarController, autoHideController, statusBarInitializer, 
                 statusBarWindowController, statusBarWindowStateController, statusBarModeRepository, keyguardUpdateMonitor, 
-                statusBarSignalPolicy, pulseExpansionHandler, notificationWakeUpCoordinator, keyguardBypassController, keyguardStateController, 
-                headsUpManager, falsingManager, falsingCollector, broadcastDispatcher, notificationGutsManager, shadeExpansionStateManager, keyguardViewMediator, displayMetrics, metricsLogger, shadeLogger, 
-                javaAdapter, uiBgExecutor, shadeSurface, notificationMediaManager, notificationLockscreenUserManagerGoogle, remoteInputManager, 
-                quickSettingsController, batteryController, colorExtractor, screenLifecycle, wakefulnessLifecycle, 
-                powerInteractor, communalInteractor, statusBarStateController, bubblesOptional, noteTaskControllerLazy, deviceProvisionedController, 
-                navigationBarController, accessibilityFloatingMenuController, assistManagerLazy, configurationController, notificationShadeWindowController, 
-                notificationShadeWindowViewControllerLazy, notificationStackScrollLayoutController, notificationPresenterLazy, notificationActivityStarterLazy, 
-                notifTransitionAnimatorControllerProvider, dozeParameters, scrimController, biometricUnlockControllerLazy, authRippleController, 
-                dozeServiceHost, backActionInteractor, powerManager, dozeScrimController, volumeComponent, commandQueue, commandQueueCallbacksLazy, 
-                pluginManager, shadeController, windowRootViewVisibilityInteractor, statusBarKeyguardViewManager, viewMediatorCallback, initController, timeTickHandler, 
-                pluginDependencyProvider, extensionController, userInfoControllerImpl, phoneStatusBarPolicy, keyguardIndicationControllerGoogle, demoModeController, 
-                notificationShadeDepthControllerLazy, statusBarTouchableRegionManager, notificationIconAreaController, brightnessSliderFactory, 
-                screenOffAnimationController, wallpaperController, statusBarHideIconsForBouncerManager, lockscreenShadeTransitionController, featureFlags, 
-                keyguardUnlockAnimationController, delayableExecutor, messageRouter, wallpaperManager, startingSurfaceOptional, activityTransitionAnimator, 
-                deviceStateManager, wiredChargingRippleController, dreamManager, cameraLauncherLazy, lightRevealScrimViewModelLazy, lightRevealScrim, 
+                statusBarSignalPolicy, pulseExpansionHandler, notificationWakeUpCoordinator, keyguardBypassController, keyguardStateController,
+                headsUpManager, falsingManager, falsingCollector, broadcastDispatcher, notificationGutsManager, shadeExpansionStateManager, keyguardViewMediator, displayMetrics, metricsLogger, shadeLogger,
+                javaAdapter, uiBgExecutor, shadeSurface, notificationMediaManager, notificationLockscreenUserManagerGoogle, remoteInputManager,
+                quickSettingsController, batteryController, colorExtractor, screenLifecycle, wakefulnessLifecycle,
+                powerInteractor, communalInteractor, statusBarStateController, bubblesOptional, noteTaskControllerLazy, deviceProvisionedController,
+                navigationBarController, accessibilityFloatingMenuController, assistManagerLazy, configurationController, notificationShadeWindowController,
+                notificationShadeWindowViewControllerLazy, notificationStackScrollLayoutController, notificationPresenterLazy, notificationActivityStarterLazy,
+                notifTransitionAnimatorControllerProvider, dozeParameters, scrimController, biometricUnlockControllerLazy, authRippleController,
+                dozeServiceHost, backActionInteractor, powerManager, dozeScrimController, volumeComponent, commandQueue, commandQueueCallbacksLazy,
+                pluginManager, shadeController, windowRootViewVisibilityInteractor, statusBarKeyguardViewManager, viewMediatorCallback, initController, timeTickHandler,
+                pluginDependencyProvider, extensionController, userInfoControllerImpl, phoneStatusBarPolicy, keyguardIndicationControllerGoogle, demoModeController,
+                notificationShadeDepthControllerLazy, statusBarTouchableRegionManager, brightnessSliderFactory,
+                screenOffAnimationController, wallpaperController, statusBarHideIconsForBouncerManager, lockscreenShadeTransitionController, featureFlags,
+                keyguardUnlockAnimationController, delayableExecutor, messageRouter, wallpaperManager, startingSurfaceOptional, activityTransitionAnimator,
+                deviceStateManager, wiredChargingRippleController, dreamManager, cameraLauncherLazy, lightRevealScrimViewModelLazy, lightRevealScrim,
                 alternateBouncerInteractor, userTracker, fingerprintManager, tunerService, activityStarter, brightnessMirrorShowingInteractor,
-                glanceableHubContainerController, emergencyGestureIntentFactory, notificationPanelViewController, burnInProtectionController);
+                glanceableHubContainerController, emergencyGestureIntentFactory, viewCaptureAwareWindowManager, burnInProtectionController);
         mContext = context;
         mBatteryStateChangeCallback = new BatteryController.BatteryStateChangeCallback() {
             @Override
@@ -344,11 +340,9 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
         mKeyguardIndicationController = keyguardIndicationControllerGoogle;
         mStatusBarStateController = statusBarStateController;
         mWallpaperNotifier = wallpaperNotifier;
-        mNotificationPanelViewController = notificationPanelViewController;
         mSmartSpaceController = smartSpaceController;
         mNotificationLockscreenUserManagerGoogle = notificationLockscreenUserManagerGoogle;
         mDockObserver = dockObserver;
-        mBurnInProtectionController = burnInProtectionController;
     }
 
     @Override

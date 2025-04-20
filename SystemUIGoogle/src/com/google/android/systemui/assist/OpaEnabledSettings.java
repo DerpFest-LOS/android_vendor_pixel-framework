@@ -16,18 +16,16 @@
 
 package com.google.android.systemui.assist;
 
-import static org.derpfest.util.DeviceKeysConstants.*;
+import static org.lineageos.internal.util.DeviceKeysConstants.*;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.os.UserHandle;
-import android.provider.Settings;
 
 import com.android.systemui.dagger.SysUISingleton;
 
-import org.derpfest.providers.DerpFestSettings;
-
 import javax.inject.Inject;
+
+import lineageos.providers.LineageSettings;
 
 @SysUISingleton
 public class OpaEnabledSettings {
@@ -43,12 +41,12 @@ public class OpaEnabledSettings {
         mContentResolver = context.getContentResolver();
 
         mHomeLongPressAction = Action.fromIntSafe(mContext.getResources().getInteger(
-                com.android.internal.R.integer.config_longPressOnHomeBehavior));
+                org.lineageos.platform.internal.R.integer.config_longPressOnHomeBehavior));
         if (mHomeLongPressAction.ordinal() > Action.SLEEP.ordinal()) {
             mHomeLongPressAction = Action.NOTHING;
         }
         mHomeLongPressAction = Action.fromSettings(mContentResolver,
-                DerpFestSettings.System.KEY_HOME_LONG_PRESS_ACTION,
+                LineageSettings.System.KEY_HOME_LONG_PRESS_ACTION,
                 mHomeLongPressAction);
     }
 
@@ -72,7 +70,7 @@ public class OpaEnabledSettings {
 
     public boolean isLongPressHomeEnabled() {
         mHomeLongPressAction = Action.fromSettings(mContentResolver,
-                DerpFestSettings.System.KEY_HOME_LONG_PRESS_ACTION,
+                LineageSettings.System.KEY_HOME_LONG_PRESS_ACTION,
                 mHomeLongPressAction);
         return mHomeLongPressAction == Action.SEARCH;
     }

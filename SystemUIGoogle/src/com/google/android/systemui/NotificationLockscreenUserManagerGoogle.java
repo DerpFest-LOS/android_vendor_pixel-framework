@@ -45,6 +45,7 @@ import com.google.android.systemui.smartspace.SmartSpaceController;
 import dagger.Lazy;
 import javax.inject.Inject;
 import java.util.concurrent.Executor;
+import android.provider.Settings;
 
 @SysUISingleton
 public final class NotificationLockscreenUserManagerGoogle extends NotificationLockscreenUserManagerImpl {
@@ -92,16 +93,15 @@ public final class NotificationLockscreenUserManagerGoogle extends NotificationL
         this.mKeyguardStateController.addCallback(callback);
     }
     public void updateSmartSpaceVisibilitySettings() {
-        boolean hideNotifs = false;
-        boolean hideSensitive = !userAllowsPrivateNotificationsInPublic(this.mCurrentUserId) && (isAnyProfilePublicMode() || !this.mKeyguardStateController.isShowing());
-        boolean hideWork = !allowsManagedPrivateNotificationsInPublic();
-        if (!((KeyguardBypassController) this.mKeyguardBypassControllerLazy.get()).getBypassEnabled()) {
-            if (hideWork && (isAnyProfilePublicMode() || !this.mKeyguardStateController.isShowing())) {
-                hideNotifs = true;
-            }
-            hideWork = hideNotifs;
+        boolean hideSensitive = !this.mSecureSettings.getBooleanForUser(Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, false, this.mCurrentUserId);
+        boolean hideWork = !this.mSecureSettings.getBooleanForUser(Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS, true, this.mCurrentUserId);
+        boolean smartspaceEnabled = this.mSecureSettings.getIntForUser(Settings.Secure.LOCK_SCREEN_SMARTSPACE_ENABLED, 1, this.mCurrentUserId) == 1;
+        
+        if (smartspaceEnabled) {
+            this.mSmartSpaceController.setHideSensitiveData(hideSensitive, hideWork);
+        } else {
+            this.mSmartSpaceController.setHideSensitiveData(true, true);
         }
-        this.mSmartSpaceController.setHideSensitiveData(hideSensitive, hideWork);
     }
 
     public void updatePublicMode() {

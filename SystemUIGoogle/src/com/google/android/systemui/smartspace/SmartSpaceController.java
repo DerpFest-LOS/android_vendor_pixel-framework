@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -78,6 +79,12 @@ public class SmartSpaceController implements Dumpable {
         }
     };
     public final Handler mUiHandler = new Handler(Looper.getMainLooper());
+    private final ContentObserver mSmartspaceEnabledObserver = new ContentObserver(mUiHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            updateSmartspaceVisibility();
+        }
+    };
 
     @Inject
     public SmartSpaceController(Context context, KeyguardUpdateMonitor keyguardUpdateMonitor, @Background Handler backgroundHandler, AlarmManager alarmManager, BroadcastSender broadcastSender, DumpManager dumpManager) {
@@ -102,6 +109,12 @@ public class SmartSpaceController implements Dumpable {
         context.registerReceiver(new UserSwitchReceiver(), intentFilter);
         context.registerReceiver(new SmartSpaceBroadcastReceiver(this, this.mBroadcastSender), new IntentFilter("com.google.android.apps.nexuslauncher.UPDATE_SMARTSPACE"), "android.permission.CAPTURE_AUDIO_HOTWORD", this.mUiHandler, 2);
         dumpManager.registerDumpable(SmartSpaceController.class.getName(), this);
+        context.getContentResolver().registerContentObserver(
+            Settings.Secure.getUriFor(Settings.Secure.LOCK_SCREEN_SMARTSPACE_ENABLED),
+            false,
+            mSmartspaceEnabledObserver,
+            UserHandle.USER_ALL
+        );
     }
 
     private SmartSpaceCard loadSmartSpaceData(boolean isCurrent) {
@@ -320,5 +333,29 @@ public class SmartSpaceController implements Dumpable {
             intentFilter.addDataSchemeSpecificPart(packageName, 0);
             return intentFilter;
         }
+    }
+
+    private void updateSmartspaceVisibility() {
+        boolean isEnabled = Settings.Secure.getIntForUser(
+            mContext.getContentResolver(),
+            Settings.Secure.LOCK_SCREEN_SMARTSPACE_ENABLED,
+            1, // default enabled
+            mCurrentUserId
+        ) == 1;
+        
+        if (!isEnabled) {
+            mData.clear();
+            update();
+        }
+    }
+
+    private boolean isSmartSpaceDisabledByExperiments() {
+        return isSmartSpaceDisabledByExperiments() || 
+            Settings.Secure.getIntForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.LOCK_SCREEN_SMARTSPACE_ENABLED,
+                1,
+                mCurrentUserId
+            ) != 1;
     }
 }

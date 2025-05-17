@@ -167,6 +167,7 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
     private final NotificationLockscreenUserManagerGoogle mNotificationLockscreenUserManagerGoogle;
     private final DockObserver mDockObserver;
     private final NotificationPanelViewController mNotificationPanelViewController;
+    private final Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
 
     private long mAnimStartTime;
     private int mReceivingBatteryLevel;
@@ -289,7 +290,8 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
             WallpaperNotifier wallpaperNotifier,
             SmartSpaceController smartSpaceController,
             DockObserver dockObserver,
-            NotificationPanelViewController notificationPanelViewController
+            NotificationPanelViewController notificationPanelViewController,
+            Lazy<NotificationPanelViewController> panelViewControllerLazy
     ) {
         super(context, notificationsController, fragmentService, lightBarController, autoHideController, statusBarInitializer,
                 statusBarWindowControllerStore, statusBarWindowStateController, statusBarModeRepository, keyguardUpdateMonitor,
@@ -310,7 +312,7 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
                 deviceStateManager, wiredChargingRippleController, dreamManager, cameraLauncherLazy, lightRevealScrim,
                 alternateBouncerInteractor, userTracker, fingerprintManager, tunerService, activityStarter, brightnessMirrorShowingInteractor,
                 glanceableHubContainerController, emergencyGestureIntentFactory, viewCaptureAwareWindowManager, burnInProtectionController,
-                notificationPanelViewController);
+                notificationPanelViewController, panelViewControllerLazy);
         mContext = context;
         mBatteryStateChangeCallback = new BatteryController.BatteryStateChangeCallback() {
             @Override
@@ -348,6 +350,7 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
         mNotificationLockscreenUserManagerGoogle = notificationLockscreenUserManagerGoogle;
         mDockObserver = dockObserver;
         mNotificationPanelViewController = notificationPanelViewController;
+        mPanelViewControllerLazy = panelViewControllerLazy;
     }
 
     @Override

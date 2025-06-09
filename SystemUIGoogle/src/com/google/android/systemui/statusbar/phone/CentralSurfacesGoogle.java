@@ -89,6 +89,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
@@ -145,6 +146,8 @@ import com.google.android.systemui.reversecharging.ReverseChargingViewController
 import com.google.android.systemui.smartspace.SmartSpaceController;
 import com.google.android.systemui.statusbar.KeyguardIndicationControllerGoogle;
 
+import org.sun.systemui.statusbar.ticker.TickerController;
+
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -167,6 +170,10 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
     private final NotificationLockscreenUserManagerGoogle mNotificationLockscreenUserManagerGoogle;
     private final DockObserver mDockObserver;
     private final NotificationPanelViewController mNotificationPanelViewController;
+    private final TickerController mTickerController;
+    private final Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
+    private final NotifPipeline mNotifPipeline;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
 
     private long mAnimStartTime;
     private int mReceivingBatteryLevel;
@@ -289,23 +296,27 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
             WallpaperNotifier wallpaperNotifier,
             SmartSpaceController smartSpaceController,
             DockObserver dockObserver,
-            NotificationPanelViewController notificationPanelViewController
+            NotificationPanelViewController notificationPanelViewController,
+            TickerController tickerController,
+            Lazy<NotificationPanelViewController> panelViewControllerLazy,
+            NotifPipeline notifPipeline,
+            NotificationInterruptStateProvider notificationInterruptStateProvider
+
     ) {
         super(context, notificationsController, fragmentService, lightBarController, autoHideController, statusBarInitializer,
                 statusBarWindowControllerStore, statusBarWindowStateController, statusBarModeRepository, keyguardUpdateMonitor,
                 statusBarSignalPolicy, pulseExpansionHandler, notificationWakeUpCoordinator, keyguardBypassController, keyguardStateController,
-                headsUpManager, falsingManager, falsingCollector, broadcastDispatcher, notificationGutsManager, shadeExpansionStateManager, keyguardViewMediator, displayMetrics, metricsLogger, shadeLogger,
+                headsUpManager, falsingManager, falsingCollector, broadcastDispatcher, notifPipeline, notificationGutsManager, shadeExpansionStateManager, tickerController, keyguardViewMediator, displayMetrics, metricsLogger, shadeLogger,
                 javaAdapter, uiBgExecutor, shadeSurface, notificationMediaManager, notificationLockscreenUserManagerGoogle, remoteInputManager,
                 quickSettingsController, batteryController, colorExtractor, screenLifecycle, wakefulnessLifecycle,
                 powerInteractor, communalInteractor, statusBarStateController, bubblesOptional, noteTaskControllerLazy, deviceProvisionedController,
                 navigationBarController, accessibilityFloatingMenuController, assistManagerLazy, configurationController, notificationShadeWindowController,
-                notificationShadeWindowViewControllerLazy, notificationStackScrollLayoutController, notificationPresenterLazy, notificationActivityStarterLazy,
+                panelViewControllerLazy, notificationShadeWindowViewControllerLazy, notificationStackScrollLayoutController, notificationPresenterLazy, notificationActivityStarterLazy,
                 notifTransitionAnimatorControllerProvider, dozeParameters, scrimController, biometricUnlockControllerLazy, authRippleController,
                 dozeServiceHost, backActionInteractor, powerManager, dozeScrimController, volumeComponent, commandQueue, commandQueueCallbacksLazy,
                 pluginManager, shadeController, windowRootViewVisibilityInteractor, statusBarKeyguardViewManager, viewMediatorCallback, initController, timeTickHandler,
                 pluginDependencyProvider, extensionController, userInfoControllerImpl, phoneStatusBarPolicy, keyguardIndicationControllerGoogle, demoModeController,
-                notificationShadeDepthControllerLazy, shadeTouchableRegionManager, brightnessSliderFactory,
-                screenOffAnimationController, wallpaperController, statusBarHideIconsForBouncerManager, lockscreenShadeTransitionController, featureFlags,
+                notificationShadeDepthControllerLazy, shadeTouchableRegionManager, notificationInterruptStateProvider, brightnessSliderFactory, screenOffAnimationController, wallpaperController, statusBarHideIconsForBouncerManager, lockscreenShadeTransitionController, featureFlags,
                 keyguardUnlockAnimationController, delayableExecutor, messageRouter, wallpaperManager, startingSurfaceOptional, activityTransitionAnimator,
                 deviceStateManager, wiredChargingRippleController, dreamManager, cameraLauncherLazy, lightRevealScrim,
                 alternateBouncerInteractor, userTracker, fingerprintManager, tunerService, activityStarter, brightnessMirrorShowingInteractor,
@@ -348,6 +359,10 @@ public class CentralSurfacesGoogle extends CentralSurfacesImpl {
         mNotificationLockscreenUserManagerGoogle = notificationLockscreenUserManagerGoogle;
         mDockObserver = dockObserver;
         mNotificationPanelViewController = notificationPanelViewController;
+        mTickerController = tickerController;
+        mPanelViewControllerLazy = panelViewControllerLazy;
+        mNotifPipeline = notifPipeline;
+        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
     }
 
     @Override
